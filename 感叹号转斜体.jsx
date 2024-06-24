@@ -176,11 +176,28 @@ function processTextLayer(textLayer) {
                 textAction.putList(idtextStyleRange, actionList);
                 action.putObject(idto, idtextLayer, textAction);
                 executeAction(idset, action, DialogModes.NO);
+
+                // 标准垂直罗马对齐方式
+                var actionRoman = new ActionDescriptor();
+                var refRoman = new ActionReference();
+                var descRoman = new ActionDescriptor();
+                refRoman.putProperty(idproperty, idtextStyle);
+                refRoman.putEnumerated(idtextLayer, idordinal, idtargetEnum); // 设置动作引用指向当前目标文本图层
+                descRoman.putInteger(idtextOverrideFeatureName, 808465976);
+                descRoman.putInteger(idtypeStyleOperationType, 3);
+                descRoman.putEnumerated(idbaselineDirection, idbaselineDirection, idwithStream);
+                actionRoman.putReference(idnull, refRoman);
+                actionRoman.putObject(idto, idtextStyle, descRoman);
+                executeAction(idset, actionRoman, DialogModes.NO);
             }
         }
         // 恢复原始抗锯齿方法和自动字距设置
         textLayer.textItem.antiAliasMethod = originalAntiAliasMethod;
-        textLayer.textItem.autoKerning = originalAutoKerning;
+
+        try {
+            textLayer.textItem.autoKerning = originalAutoKerning;
+        } catch (e) {
+        }
     }
 }
 
