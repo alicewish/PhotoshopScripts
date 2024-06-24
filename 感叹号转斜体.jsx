@@ -111,10 +111,24 @@ function processTextLayer(textLayer) {
         app.activeDocument.activeLayer = textLayer;
         // 获取原始格式设置
         var originalAntiAliasMethod = textItem.antiAliasMethod;
-        var originalAutoKerning = textItem.autoKerning;
+        var hasKerning = false;
+        try {
+            var originalAutoKerning = textItem.autoKerning;
+            hasKerning = true;
+        } catch (e) {
+            hasKerning = false;
+        }
         var originalFontSize = textItem.size;      // 原始字号
         var originalFont = textItem.font;          // 原始字体
-        var originalColor = textItem.color;        // 原始颜色
+
+        var hasColor = false;
+        try {
+            // 原始颜色
+            var originalColor = textItem.color;
+            hasColor = true;
+        } catch (e) {
+            hasColor = false;
+        }
 
         for (var i = 0; i < content.length; i++) {
             var chara = content[i];
@@ -161,15 +175,17 @@ function processTextLayer(textLayer) {
                 // alert(originalFont);
                 // 保持原始字号
                 formatting.putUnitDouble(idsize, idpixelsUnit, originalFontSize);
-                // 保持原始文字颜色
-                var red = originalColor.rgb.red
-                var green = originalColor.rgb.green
-                var blue = originalColor.rgb.blue
-                var colorAction = new ActionDescriptor();
-                colorAction.putDouble(idRd, red);
-                colorAction.putDouble(idGrn, green);
-                colorAction.putDouble(idBl, blue);
-                formatting.putObject(idcolor, idRGBColor, colorAction);
+                if (hasColor) {
+                    // 保持原始文字颜色
+                    var red = originalColor.rgb.red
+                    var green = originalColor.rgb.green
+                    var blue = originalColor.rgb.blue
+                    var colorAction = new ActionDescriptor();
+                    colorAction.putDouble(idRd, red);
+                    colorAction.putDouble(idGrn, green);
+                    colorAction.putDouble(idBl, blue);
+                    formatting.putObject(idcolor, idRGBColor, colorAction);
+                }
 
                 textRange.putObject(idtextStyle, idtextStyle, formatting);
                 actionList.putObject(idtextStyleRange, textRange);
@@ -193,10 +209,8 @@ function processTextLayer(textLayer) {
         }
         // 恢复原始抗锯齿方法和自动字距设置
         textLayer.textItem.antiAliasMethod = originalAntiAliasMethod;
-
-        try {
+        if (hasKerning) {
             textLayer.textItem.autoKerning = originalAutoKerning;
-        } catch (e) {
         }
     }
 }
